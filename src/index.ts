@@ -24,6 +24,7 @@ server.on('request', async (req, res) => {
 
     const reqJson = JSON.parse(Buffer.concat(buffers).toString()) as {
       url: string;
+      account?: string;
     };
 
     if (!reqJson || !reqJson.url) {
@@ -45,7 +46,7 @@ server.on('request', async (req, res) => {
       media.map(m => {
         return download.image({
           url: m.url,
-          dest: `${config.downloadPath}/${m.filename}.${m.extension}`,
+          dest: `${config.downloadPath}/${reqJson.account ? reqJson.account + '/' : ''}${m.filename}.${m.extension}`,
           extractFilename: false,
         });
       }),
@@ -55,7 +56,7 @@ server.on('request', async (req, res) => {
     });
 
     res.writeHead(200);
-    res.end(`Downloaded ${media.length} files from ${reqJson.url}`);
+    res.end(`Downloaded ${media.length} files from ${JSON.stringify(reqJson.url)}`);
   } catch (error) {
     console.error(error);
     res.writeHead(404);
